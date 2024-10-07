@@ -1,0 +1,19 @@
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create deployment
+      id: deployment
+      run: |
+        DEPLOYMENT_RESPONSE=$(curl -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"ref": "main", "environment": "production"}' \
+          https://api.github.com/repos/${{ github.repository }}/deployments)
+        
+        DEPLOYMENT_ID=$(echo $DEPLOYMENT_RESPONSE | jq '.id')
+        echo "::set-output name=deployment_id::$DEPLOYMENT_ID"
+
+    - name: Use deployment ID in future steps
+      run: |
+        echo "Deployment ID: ${{ steps.deployment.outputs.deployment_id }}"
